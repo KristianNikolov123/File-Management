@@ -11,3 +11,35 @@ services:
     command: start-dev
     volumes:
       - keycloak-data:/opt/keycloak/data
+
+  nfs-server:
+    image: itsthenetwork/nfs-server-alpine:latest
+    container_name: nfs-server
+    privileged: true
+    volumes:
+      - nfs-data:/data
+    environment:
+      - SHARED_DIRECTORY=/data
+    ports:
+      - "2049:2049"
+  
+  node-app:
+    image: node:18-alpine
+    container_name: myapp
+    build:
+      context: ./app 
+    ports:
+      - "3000:3000" 
+    environment:
+      - NFS_MOUNT_PATH=/mnt/nfs
+      - KEYCLOAK_HOSTNAME=http://keycloak:8080
+    depends_on:
+      - nfs-server
+      - keycloak
+    volumes:
+      - nfs-data:/mnt/nfs 
+
+volumes:
+  keycloak-data:
+  nfs-data:
+    driver: local
