@@ -23,7 +23,7 @@ services:
     ports:
       - "2049:2049"
   
-  node-app:
+  myapp:
     image: node:18-alpine
     container_name: myapp
     build:
