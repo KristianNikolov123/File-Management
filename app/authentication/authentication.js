@@ -1,33 +1,27 @@
-const jwt = require('jsonwebtoken');
-const jwksClient = require('jwks-rsa');
-
+import jwt from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
 
 const keycloakInternalUrl = 'http://keycloak:8080';
 const keycloakIssuer = 'http://localhost:8080/realms/myapp';
+
 const clientId = 'account';
 
-
 const client = jwksClient({
-  jwksUri: `${keycloakInternalUrl}/realms/myapp/protocol/openid-connect/certs`,
+  jwksUri: `${keycloakInternalUrl}/realms/myapp/protocol/openid-connect/certs`, 
 });
 
-
-function getKey(header, callback) {
-  client.getSigningKey(header.kid, (error, key) => {
-    if (error) {
-      console.error('Error retrieving signing key:', error);
-      callback(error, null);
+const getKey = (header, callback) => {
+  client.getSigningKey(header.kid, (err, key) => {
+    if (err) {
+      callback(err, null);
     } else {
-      const publicKey = key.getPublicKey();
-      callback(null, publicKey);
+      callback(null, key.getPublicKey());
     }
   });
-}
+};
 
-
-function authentication(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader?.split(' ')[1];
+const authentication = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1]; 
 
   if (!token) {
     return res.status(401).json({ error: 'Access token is missing' });
@@ -36,17 +30,20 @@ function authentication(req, res, next) {
   jwt.verify(
     token,
     getKey,
-    { audience: clientId, issuer: keycloakIssuer },
-    (error, decoded) => {
-      if (error) {
-        console.error('Token verification failed:', error);
+    {
+      audience: clientId,
+      issuer: keycloakIssuer,
+    },
+    (err, decoded) => {
+      if (err) {
+        console.error(err);
         return res.status(403).json({ error: 'Invalid or expired token' });
       }
 
-      req.user = decoded;
+      req.user = decoded; 
       next();
     }
   );
-}
+};
 
-module.exports = authentication;
+export default authentication;

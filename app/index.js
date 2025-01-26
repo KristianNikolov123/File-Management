@@ -1,10 +1,14 @@
 import express from 'express';
-import fileRoutes from './routes/routes.js';
+import routes from './routes/routes.js';
 
 const app = express();
-const PORT = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/file', fileRoutes);
+app.use('/file', routes);
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

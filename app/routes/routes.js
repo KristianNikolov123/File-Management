@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import fs from 'fs-extra';
+import path from 'path';
+import authentication from '../authentication/authentication.js';
+
 const router = express.Router();
-const authentication = require('../authentication/authentication');
-const fs = require('fs-extra');
-const path = require('path');
 
 const NFS_PATH = process.env.NFS_PATH || '/mnt/nfs';
 
@@ -41,4 +42,4 @@ router.get('/:fileId', authentication, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
